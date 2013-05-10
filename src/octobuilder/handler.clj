@@ -1,8 +1,12 @@
 (ns octobuilder.handler
-  (:use compojure.core)
-  (:require [compojure.handler :as handler]
-            [compojure.route :as route]
-            [clj-oauth2.ring :as oauth2-ring]))
+  (:use compojure.core
+        [ring.middleware.session :only [wrap-session]]
+        [ring.middleware.params :only [wrap-params]]
+        [ring.middleware.keyword-params :only [wrap-keyword-params]]
+        [clj-oauth2.client :only [wrap-oauth2]])
+  (:require [octobuilder.oauth2 :as octo-auth]
+            [compojure.handler :as handler]
+            [compojure.route :as route]))
 
 
 (defroutes app-routes
@@ -12,4 +16,8 @@
 
 
 (def app
-  (handler/site app-routes))
+  (-> app-routes
+      ;; (wrap-oauth2 octo-auth/github-com-oauth2)
+      wrap-session
+      wrap-keyword-params
+      wrap-params))

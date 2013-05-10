@@ -1,15 +1,17 @@
-(ns octobuilder.oauth2)
+(ns octobuilder.oauth2
+  (:require [octobuilder.secrets :as secrets]
+            [clj-oauth2.ring :as oauth2-ring]))
 
 
 (def login-uri "https://github.com/login/oauth")
 
 
-(def oath2-settings
+(def github-com-oauth2
   {:authorization-uri (str login-uri "/authorize")
    :access-token-uri (str login-uri "/access_token")
    :redirect-uri "https://simonjagoe.com/login"
-   :client-id ""
-   :client-secret ""
+   :client-id secrets/client-id
+   :client-secret secrets/client-secret
    :scope ["repo"]
    :grant-type "authorization_code"
    :force-https true
