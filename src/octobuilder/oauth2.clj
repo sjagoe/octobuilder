@@ -9,7 +9,7 @@
 (def github-com-oauth2
   {:authorization-uri (str login-uri "/authorize")
    :access-token-uri (str login-uri "/access_token")
-   :redirect-uri "https://simonjagoe.com/login"
+   :redirect-uri "https://simonjagoe.com/projects"
    :client-id secrets/client-id
    :client-secret secrets/client-secret
    :scope ["repo"]
