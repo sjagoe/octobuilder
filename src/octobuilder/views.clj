@@ -1,8 +1,8 @@
 (ns octobuilder.views)
 
-(def base-view []
+(defn base-view []
   "Hello World")
 
 
-(def project-list []
+(defn project-list []
   "List of projects")
