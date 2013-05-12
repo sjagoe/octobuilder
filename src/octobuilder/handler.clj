@@ -11,15 +11,18 @@
 
 
 (defroutes app-routes
-  (GET "/" {:as request} (view-session request))
-  (GET "/projects" {:as request} (view-session request))
+  (GET "/" {oauth2 :oauth2 :as session}
+       (print-thing #(base-view oauth2) oauth2))
+  (GET "/projects" {params :params session :session oauth2 :oauth2}
+       (print-thing project-list [params session oauth]))
+  (GET "/login-complete" [] (login-complete))
   (route/resources "/")
   (route/not-found "Not Found"))
 
 
 (def app
   (-> app-routes
-      ;; (wrap-oauth2 octo-auth/github-com-oauth2)
+      (wrap-oauth2 octo-auth/github-com-oauth2)
       wrap-session
       wrap-keyword-params
       wrap-params))

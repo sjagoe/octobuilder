@@ -9,12 +9,12 @@
 (def github-com-oauth2
   {:authorization-uri (str login-uri "/authorize")
    :access-token-uri (str login-uri "/access_token")
-   :redirect-uri "https://simonjagoe.com/projects"
+   :redirect-uri "http://simonjagoe.com:8000/login-complete"
    :client-id secrets/client-id
    :client-secret secrets/client-secret
    :scope ["repo"]
    :grant-type "authorization_code"
-   :force-https true
+   :force-https false
    :trace-messages false
    :get-state oauth2-ring/get-state-from-session
    :put-state oauth2-ring/put-state-in-session
