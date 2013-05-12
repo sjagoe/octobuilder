@@ -1,8 +1,8 @@
 (ns octobuilder.views
-  (:require [octobuilder.secrets :as secrets]
-            [clojure.string :as string]
+  (:require [clojure.string :as string]
             [clojure.pprint :as pprint]
-            [ring.util.response :as ring-response])
+            [ring.util.response :as ring-response]
+            [tentacles.repos :as repos])
   (:import [java.io StringWriter]))
 
 
@@ -17,8 +17,10 @@
   (ring-response/redirect "/projects"))
 
 
-(defn project-list []
-  "List of projects")
+(defn project-list [oauth2]
+  (let [oauth_token (:access-token oauth2)]
+    (pprint/pprint oauth2)
+    (view-session (repos/repos {:type "private" :oauth_token oauth_token}))))
 
 
 (defn print-thing [real-handler thing]
@@ -29,5 +31,4 @@
 (defn view-session [session]
   (let [writer (StringWriter.)]
     (pprint/pprint session writer)
-    (pprint/pprint session)
     (str "<pre>" (string/replace (.toString writer) "\n" "<br/>") "</pre>")))

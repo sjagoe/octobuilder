@@ -14,7 +14,7 @@
   (GET "/" {oauth2 :oauth2 :as session}
        (print-thing #(base-view oauth2) oauth2))
   (GET "/projects" {params :params session :session oauth2 :oauth2}
-       (print-thing project-list [params session oauth]))
+       (project-list oauth2))
   (GET "/login-complete" [] (login-complete))
   (route/resources "/")
   (route/not-found "Not Found"))
