@@ -4,7 +4,7 @@
   :url "https://github.com/sjagoe/octobuilder"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [compojure "1.1.5"]
-                 ;; [com.datomic/datomic-free "0.8.3899"]
+                 [com.datomic/datomic-free "0.8.3941"]
                  [tentacles "0.2.4"]
                  [bwhmather/clj-oauth2 "0.5.1"]
                  [hiccup "1.0.3"]]

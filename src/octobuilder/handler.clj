@@ -12,7 +12,7 @@
 
 (defroutes app-routes
   (GET "/" {oauth2 :oauth2 :as session}
-       (print-thing #(base-view oauth2) oauth2))
+       (base-view oauth2))
   (GET "/projects" {params :params session :session oauth2 :oauth2}
        (project-list oauth2))
   (GET "/login-complete" [] (login-complete))
