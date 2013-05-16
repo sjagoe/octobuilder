@@ -1,5 +1,6 @@
 (ns octobuilder.database
-  (:use [datomic.api :only [q db] :as d]))
+  (:use [datomic.api :only [q db] :as d])
+  (:require [octobuilder.secrets :as secrets]))
 
 
 ;; (def database-uri "datomic:free://localhost:4334/octobuilder")
@@ -13,7 +14,33 @@
 
 
 (def schema
-  [;; Users
+  [;; projects
+   ; owner name; string
+   {:db/id (d/tempid :db.part/db)
+    :db/ident :project/owner
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/fulltext false
+    :db/doc "The name of the project's owner"
+    :db.install/_attribute :db.part/db}
+   ; project name; string
+   {:db/id (d/tempid :db.part/db)
+    :db/ident :project/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/fulltext false
+    :db/doc "The name of the project repository"
+    :db.install/_attribute :db.part/db}
+   ; project user; ref
+   {:db/id (d/tempid :db.part/db)
+    :db/ident :project/user
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one
+    :db/fulltext false
+    :db/doc "Reference to the user for logging in to github"
+    :db.install/_attribute :db.part/db}
+
+   ;; Users
    {:db/id (d/tempid :db.part/db)
     :db/ident :github/access-token
     :db/valueType :db.type/string
@@ -224,30 +251,43 @@
    ])
 
 
-(def bootstrap-contents
-  [;; github service
-   {:db/id (d/tempid :db.part/user -100001)
-    :service/name "github"}
-
-   {:db/id (d/tempid :db.part/user -100002)
-    :service/name "jenkins"}
-
-   {:db/id (d/tempid :db.part/user -200003)
-    :github/access-token "foo"
-    :user/username "sjagoe"
-    :user/service (d/tempid :db.part/user -100001)
-    }
-
-   {:db/id (d/tempid :db.part/user -200004)
-    :jenkins/password "some-password"
-    :user/username "pr-builder"
-    :user/service (d/tempid :db.part/user -100002)
-    }
-
-   ])
+(defn make-github-user-tx [github-id users]
+  (fn [coll user-name]
+    (let [user (users user-name)
+          user-id (:id user)
+          token (:token user)]
+      (conj coll {:db/id user-id
+                  :github/access-token token
+                  :user/username user-name
+                  :user/service github-id}))))
 
 
-(defn bootstrap [schema bootstrap-contents]
+(defn make-project-tx [users]
+  (fn [project]
+    {:db/id (d/tempid :db.part/user)
+     :project/owner (:owner project)
+     :project/name (:project project)
+     :project/user (:id (users (:user project)))}))
+
+
+(defn bootstrap-contents [users projects]
+  (let [github-id (d/tempid :db.part/user)
+        jenkins-id (d/tempid :db.part/user)
+        user-ids-tokens (reduce #(assoc %1 %2 {:id (d/tempid :db.part/user) :token (users %2)})
+                                {} (keys users))
+        github-user-txs (reduce (make-github-user-tx github-id user-ids-tokens)
+                                [] (keys user-ids-tokens))
+        project-txs (map (make-project-tx user-ids-tokens) projects)
+        ]
+    (concat github-user-txs
+            project-txs
+            [{:db/id github-id
+              :service/name "github"}
+             {:db/id jenkins-id
+              :service/name "jenkins"}])))
+
+
+(defn bootstrap [schema users projects]
   (do
     @(d/transact conn schema)
-    @(d/transact conn bootstrap-contents)))
+    @(d/transact conn (bootstrap-contents users projects))))
