@@ -6,6 +6,12 @@
   (:import [java.io StringWriter]))
 
 
+(defn view-session [session]
+  (let [writer (StringWriter.)]
+    (pprint/pprint session writer)
+    (str "<pre>" (string/replace (.toString writer) "\n" "<br/>") "</pre>")))
+
+
 (defn base-view [oauth2]
   (if oauth2
     (ring-response/redirect "/projects")
@@ -26,9 +32,3 @@
 (defn print-thing [real-handler thing]
   (pprint/pprint thing)
   (real-handler))
-
-
-(defn view-session [session]
-  (let [writer (StringWriter.)]
-    (pprint/pprint session writer)
-    (str "<pre>" (string/replace (.toString writer) "\n" "<br/>") "</pre>")))
