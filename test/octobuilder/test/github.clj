@@ -1,7 +1,7 @@
-(ns octobuilder.test.database
+(ns octobuilder.test.github
   (:use clojure.test
         conjure.core
-        octobuilder.database)
+        octobuilder.github)
   (:require [datomic.api :as d]))
 
 (def an-organization {:following_url       "https://api.github.com/users/company/following{/other_user}"
