@@ -86,14 +86,6 @@
     (list repository ref)))
 
 
-(defn- unravel [n coll]
-  (map #(take-nth n (drop % coll)) (range n)))
-
-
-(defn- get-tx [tx-map]
-  (unravel 2 (concat (list tx-map))))
-
-
 (defn pull-request-to-tx [pull-request]
   "Returns a datomic transaction constructed from a github pull request"
   (let [base (:base pull-request)
@@ -119,4 +111,4 @@
                                                 :github.pullrequest/user user-id
                                                 :github.pullrequest/base base-id
                                                 :github.pullrequest/head head-id}})]]
-        (merge-txs parts)))))
+        (vals (:tx (merge-txs parts)))))))

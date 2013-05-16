@@ -202,20 +202,12 @@
                               head-id expected-head-tx})))))
                 (testing "pull-request-to-tx"
                   (let [result (pull-request-to-tx a-pull-request)]
-                    (testing ":id-cache"
-                      (is (= (:id-cache result)
-                             {(:id an-organization) organization-id
-                              (:id a-real-user) user-id
-                              (:id a-repo) repo-id
-                              (identify-head a-head) head-id
-                              (:id a-pull-request) pull-request-id})))
-                    (testing ":tx"
-                      (is (= (:tx result)
-                             {organization-id expected-organization-tx
-                              user-id expected-user-tx
-                              repo-id expected-repo-tx
-                              head-id expected-head-tx
-                              pull-request-id expected-pr-tx})))))))))
+                    (is (= (sort-by :github.general/id result)
+                           (sort-by :github.general/id (list expected-organization-tx
+                                                             expected-user-tx
+                                                             expected-repo-tx
+                                                             expected-head-tx
+                                                             expected-pr-tx))))))))))
 
 
 (deftest test-merge-txs
