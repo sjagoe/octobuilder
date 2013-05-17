@@ -80,9 +80,12 @@
                      :db.cardinality/one
                      "The service for which this user is used")
 
+   [:db/add (d/tempid :db.part/user) :db/ident :octobuilder.service/github]
+   [:db/add (d/tempid :db.part/user) :db/ident :octobuilder.service/jenkins]
+
    ;; services
-   (make-schema-part :service/name
-                     :db.type/string
+   (make-schema-part :service/type
+                     :db.type/ref ; :octobuilder.service/*
                      :db.cardinality/one
                      "The name of this service")
 
@@ -220,14 +223,22 @@
 ;;                   :user/service github-id}))))
 
 
-(defn make-github-user-tx [github-id github-user-ids github-users]
+(defn make-user-tx [service-id user-ids users]
   (fn [coll user-key]
-    (let [user-id (github-user-ids user-key)
-          user (github-users user-key)]
-      (conj coll {:db/id user-id
-                  :github/access-token (:token user)
-                  :user/username (:name user)
-                  :user/service github-id}))))
+    (let [user-id (user-ids user-key)
+          user (users user-key)
+          token (:token user)
+          password (:password user)
+          base {:db/id user-id
+                :user/username (:name user)
+                :user/service service-id}
+          result (if (not (nil? token))
+                   (assoc base :github/access-token token)
+                   (if (not (nil? password))
+                     (assoc base :jenkins/password password)))]
+      (if (not (nil? result))
+        (conj coll result)
+        coll))))
 
 
 (defn make-project-tx [users]
@@ -238,27 +249,47 @@
      :project/user (users (:user project))}))
 
 
-(defn allocate-user-db-ids [users]
+(defn allocate-db-ids [users]
   (reduce #(assoc %1 %2 (d/tempid :db.part/user)) {} (keys users)))
 
 
-(defn bootstrap-contents [github-users projects]
+(defn make-jenkins-job-tx [user-ids job-ids jobs]
+  (fn [coll job-key]
+    (let [job-id (job-ids job-key)
+          job (jobs job-key)
+          name (:name job)
+          location (:location job)
+          user-id (user-ids (:user job))]
+      (conj coll {:db/id job-id
+                  :jenkins.job/name name
+                  :jenkins.job/location location
+                  :jenkins.job/user user-id}))))
+
+
+(defn bootstrap-contents [github-users projects jenkins-users jenkins-jobs]
   (let [github-id (d/tempid :db.part/user)
         jenkins-id (d/tempid :db.part/user)
-        github-user-ids (allocate-user-db-ids github-users)
-        github-user-txs (reduce (make-github-user-tx github-id github-user-ids github-users)
+        github-user-ids (allocate-db-ids github-users)
+        github-user-txs (reduce (make-user-tx github-id github-user-ids github-users)
                                 [] (keys github-user-ids))
-        project-txs (map (make-project-tx github-user-ids) projects)
-        ]
+        jenkins-user-ids (allocate-db-ids jenkins-users)
+        jenkins-user-txs (reduce (make-user-tx jenkins-id jenkins-user-ids jenkins-users)
+                                 [] (keys jenkins-user-ids))
+        jenkins-job-ids (allocate-db-ids jenkins-jobs)
+        jenkins-job-txs (reduce (make-jenkins-job-tx jenkins-user-ids jenkins-job-ids jenkins-jobs)
+                                [] (keys jenkins-job-ids))
+        project-txs (map (make-project-tx github-user-ids) projects)]
     (concat github-user-txs
+            jenkins-user-txs
+            jenkins-job-txs
             project-txs
             [{:db/id github-id
-              :service/name "github"}
+              :service/type :octobuilder.service/github}
              {:db/id jenkins-id
-              :service/name "jenkins"}])))
+              :service/type :octobuilder.service/jenkins}])))
 
 
-(defn bootstrap [schema users projects]
+(defn bootstrap [schema users projects jenkins-users jenkins-jobs]
   (do
     @(d/transact conn schema)
-    @(d/transact conn (bootstrap-contents users projects))))
+    @(d/transact conn (bootstrap-contents users projects jenkins-users jenkins-jobs))))
