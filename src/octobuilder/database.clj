@@ -212,17 +212,6 @@
    ])
 
 
-;; (defn make-github-user-tx [github-id users]
-;;   (fn [coll user-name]
-;;     (let [user (users user-name)
-;;           user-id (:id user)
-;;           token (:token user)]
-;;       (conj coll {:db/id user-id
-;;                   :github/access-token token
-;;                   :user/username user-name
-;;                   :user/service github-id}))))
-
-
 (defn make-user-tx [service-id user-ids users]
   (fn [coll user-key]
     (let [user-id (user-ids user-key)
