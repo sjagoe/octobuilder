@@ -192,7 +192,7 @@
                      "The user ... ?")
    ; base; ref
    (make-schema-part :github.pullrequest/base
-                     :db.type/ref       ; guthub.repp
+                     :db.type/ref       ; github.head
                      :db.cardinality/one
                      "The base repositorty against which the pull request was made")
    ; head; ref

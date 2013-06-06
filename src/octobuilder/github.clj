@@ -5,7 +5,7 @@
 
 (defn get-existing-entity-id [github-id]
   (let [existing-entity (q '[:find ?entity :in $ ?github-id :where
-                             [?entity :github.general/id ]]
+                             [?entity :github.general/id]]
                            (db conn) github-id)]
     (if (not (empty? existing-entity))
       (first (first existing-entity)))))
@@ -86,20 +86,21 @@
     (list repository ref)))
 
 
-(defn pull-request-to-tx [pull-request]
+(defn pull-request-to-tx
   "Returns a datomic transaction constructed from a github pull request"
+  [pull-request]
   (let [base (:base pull-request)
         head (:head pull-request)
         user (:user pull-request)]
     (let [id-cache (assoc-id {} pull-request)
-          id-cache (assoc-id id-cache base)
           id-cache (assoc-id id-cache user)
+          id-cache (assoc-id id-cache base identify-head)
           id-cache (assoc-id id-cache head identify-head)
           pull-request-id (id-cache (:id pull-request))
-          base-id (id-cache (:id base))
+          base-id (id-cache (identify-head base))
           head-id (id-cache (identify-head head))
           user-id (id-cache (:id user))]
-      (let [parts [(repo-to-tx id-cache base base-id)
+      (let [parts [(head-to-tx id-cache base base-id)
                    (head-to-tx id-cache head head-id)
                    (user-to-tx id-cache user user-id)
                    (create-tx id-cache

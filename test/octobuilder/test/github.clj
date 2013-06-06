@@ -124,7 +124,7 @@
                      :title "Some Title"
                      :created_at "2013-05-13T15:20:17Z"
                      :url     "https://api.github.com/repos/company/Project/pulls/1234"
-                     :base     a-repo
+                     :base     a-head
                      :_links     {:self      {:href       "https://api.github.com/repos/company/Project/pulls/1234"}
                                   :html      {:href "https://github.com/company/Project/pull/1234"}
                                   :issue      {:href       "https://api.github.com/repos/company/Project/issues/1234"}
@@ -173,7 +173,7 @@
                           :github.pullrequest/html-url (:html_url a-pull-request)
                           :github.pullrequest/number (:number a-pull-request)
                           :github.pullrequest/user user-id
-                          :github.pullrequest/base repo-id
+                          :github.pullrequest/base head-id
                           :github.pullrequest/head head-id}]
       (stubbing [get-existing-entity-id make-db-id]
                 (testing "user-to-tx"

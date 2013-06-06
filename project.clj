@@ -10,6 +10,6 @@
                  [hiccup "1.0.3"]]
   :plugins [[lein-ring "0.8.3"]]
   :ring {:handler octobuilder.handler/app}
-  :profiles
-  {:dev {:dependencies [[ring-mock "0.1.3"]
-                        [org.clojars.runa/conjure "2.1.3"]]}})
+  :profiles {:dev {:dependencies [[ring-mock "0.1.3"]
+                                  [org.clojars.runa/conjure "2.1.3"]]
+                   :source-paths ["dev-src"]}})
