@@ -5,6 +5,8 @@ Octobuilder
 Octobuilder is a Clojure server that sits between Jenkins and Github
 to facilitate automatic building of pull requests.
 
+Development is in very early stages and there is nothing to try yet.
+
 
 Dependencies
 ============
