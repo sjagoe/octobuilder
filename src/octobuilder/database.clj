@@ -201,14 +201,42 @@
                      :db.cardinality/one
                      "The HEAD of the pull request")
 
+   ;; build statuses
+   [:db/add (d/tempid :db.part/user) :db/ident :jenkins.build.status/waiting]
+   [:db/add (d/tempid :db.part/user) :db/ident :jenkins.build.status/running]
+   [:db/add (d/tempid :db.part/user) :db/ident :jenkins.build.status/failed]
+   [:db/add (d/tempid :db.part/user) :db/ident :jenkins.build.status/aborted]
+   [:db/add (d/tempid :db.part/user) :db/ident :jenkins.build.status/successful]
 
    ;; builds
-   {:db/id (d/tempid :db.part/db)
-    :db/ident :jenkins.build/number
-    :db/valueType :db.type/long}
-   {:db/id (d/tempid :db.part/db)
-    :db/ident :jenkins.build/url
-    :db/valueType :db.type/string}
+   (make-schema-part :jenkins.build/project
+                     :db.type/ref
+                     :db.cardinality/one
+                     "Github project associated with this build")
+   (make-schema-part :jenkins.build/pull-request
+                     :db.type/ref
+                     :db.cardinality/one
+                     "Pull request being built")
+   (make-schema-part :jenkins.build/name
+                     :db.type/string
+                     :db.cardinality/one
+                     "The Jenkins build name?")
+   (make-schema-part :jenkins.build/number
+                     :db.type/long
+                     :db.cardinality/one
+                     "The Jenkins build number")
+   (make-schema-part :jenkins.build/url
+                     :db.type/string
+                     :db.cardinality/one
+                     "URL of the Jenkins build")
+   (make-schema-part :jenkins.build/status
+                     :db.type/ref ; :jenkins.build.status/*
+                     :db.cardinality/one
+                     "The status of the build")
+   (make-schema-part :jenkins.build/sha
+                     :db.type/string
+                     :db.cardinality/one
+                     "The SHA built")
    ])
 
 
