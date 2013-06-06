@@ -18,7 +18,7 @@
      (make-schema-part ident type cardinality doc false))
   ([ident type cardinality doc fulltext]
      {:db/id (d/tempid :db.part/db)
-      :db/ident name
+      :db/ident ident
       :db/valueType type
       :db/cardinality cardinality
       :db/fulltext fulltext
@@ -156,7 +156,7 @@
    (make-schema-part :github.head/repository
                      :db.type/ref       ; github.repository
                      :db.cardinality/one
-                     "THe repository to which the HEAD belongs" 
+                     "THe repository to which the HEAD belongs"
                       )
 
    ;;; pull request states
